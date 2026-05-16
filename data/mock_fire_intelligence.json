@@ -1,0 +1,15 @@
+{
+  "location": { "lat": 34.0522, "lng": -118.2437 },
+  "activeFires": [
+    { "latitude": 34.12, "longitude": -118.3, "confidence": "high", "frp": 56.2 }
+  ],
+  "weather": {
+    "temperatureC": 33.1,
+    "humidityPct": 19,
+    "windSpeedMps": 8.3,
+    "windDeg": 45
+  },
+  "heatIndex": 0.81,
+  "smokeRisk": 0.67,
+  "generatedAt": "2026-05-16T10:10:00.000Z"
+}

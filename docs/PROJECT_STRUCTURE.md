@@ -1,0 +1,53 @@
+# Project Structure
+
+```txt
+fire-disaster-everybody-hacks26/
+  ai-service/
+    app/
+      main.py
+      model.py
+      preprocessing.py
+      schemas.py
+    data/
+      sample_training_data.csv
+    requirements.txt
+    train.py
+  backend/
+    src/
+      app.js
+      server.js
+      config/
+      middleware/
+      jobs/
+      routes/
+      services/
+      utils/
+    .env.example
+    package.json
+  mobile/
+    src/
+      components/
+      context/
+      navigation/
+      screens/
+      services/
+      theme/
+      types/
+    .env.example
+    App.tsx
+    app.json
+    package.json
+  data/
+    mock_fire_intelligence.json
+  docs/
+    API.md
+    DATABASE_SCHEMA.md
+    DEPLOYMENT.md
+    MVP_ROADMAP.md
+    PROJECT_STRUCTURE.md
+    SCALABILITY.md
+    UI_DESIGN.md
+  .gitignore
+  README.md
+  package.json
+```

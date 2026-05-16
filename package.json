@@ -1,0 +1,19 @@
+{
+  "name": "firepath-ai",
+  "version": "1.0.0",
+  "private": true,
+  "description": "FirePath AI monorepo: mobile, backend, and AI wildfire prediction service.",
+  "workspaces": [
+    "mobile",
+    "backend"
+  ],
+  "scripts": {
+    "dev:mobile": "npm --workspace mobile run start",
+    "dev:backend": "npm --workspace backend run dev",
+    "dev:ai": "uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload --app-dir ai-service",
+    "lint:backend": "npm --workspace backend run lint"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

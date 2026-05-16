@@ -1,16 +1,17 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
-import {
-  User,
-  createUserWithEmailAndPassword,
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  signOut
-} from "firebase/auth";
-import { firebaseAuth } from "../services/firebase";
+import * as SecureStore from "expo-secure-store";
 import { setAuthToken } from "../services/api";
+import { api } from "../services/api";
+
+type AppUser = {
+  id: string;
+  email: string;
+  roles: string[];
+  displayName?: string | null;
+};
 
 type AuthContextValue = {
-  user: User | null;
+  user: AppUser | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string) => Promise<void>;
@@ -19,22 +20,30 @@ type AuthContextValue = {
 };
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+const AUTH_TOKEN_KEY = "authToken";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    return onAuthStateChanged(firebaseAuth, async (nextUser) => {
-      setUser(nextUser);
-      if (nextUser) {
-        const token = await nextUser.getIdToken();
+    (async () => {
+      const token = await SecureStore.getItemAsync(AUTH_TOKEN_KEY);
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      try {
         setAuthToken(token);
-      } else {
+        const { data } = await api.get("/auth/me");
+        setUser(data.user);
+      } catch {
         setAuthToken(null);
+        await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
       }
       setLoading(false);
-    });
+    })();
   }, []);
 
   const value = useMemo<AuthContextValue>(
@@ -42,16 +51,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       user,
       loading,
       login: async (email, password) => {
-        await signInWithEmailAndPassword(firebaseAuth, email, password);
+        const { data } = await api.post("/auth/login", { email, password });
+        setAuthToken(data.token);
+        await SecureStore.setItemAsync(AUTH_TOKEN_KEY, data.token);
+        setUser(data.user);
       },
       register: async (email, password) => {
-        await createUserWithEmailAndPassword(firebaseAuth, email, password);
+        const { data } = await api.post("/auth/register", { email, password });
+        setAuthToken(data.token);
+        await SecureStore.setItemAsync(AUTH_TOKEN_KEY, data.token);
+        setUser(data.user);
       },
       loginWithGoogle: async () => {
-        throw new Error("Google sign-in scaffolded; implement Expo AuthSession OAuth flow.");
+        throw new Error("Google OAuth not configured for PostgreSQL auth flow yet.");
       },
       logout: async () => {
-        await signOut(firebaseAuth);
+        setAuthToken(null);
+        setUser(null);
+        await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
       }
     }),
     [loading, user]

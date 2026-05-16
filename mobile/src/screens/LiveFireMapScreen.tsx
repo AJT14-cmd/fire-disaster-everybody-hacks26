@@ -1,20 +1,19 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
-import MapView, { Circle, Marker } from "react-native-maps";
+import { Circle, Marker, OpenStreetMapView } from "../components/OpenStreetMapView";
 import { colors } from "../theme/colors";
+
+const INITIAL_REGION = {
+  latitude: 34.0522,
+  longitude: -118.2437,
+  latitudeDelta: 0.25,
+  longitudeDelta: 0.25
+};
 
 export function LiveFireMapScreen() {
   return (
     <View style={styles.container}>
-      <MapView
-        style={styles.map}
-        initialRegion={{
-          latitude: 34.0522,
-          longitude: -118.2437,
-          latitudeDelta: 0.25,
-          longitudeDelta: 0.25
-        }}
-      >
+      <OpenStreetMapView style={styles.map} initialRegion={INITIAL_REGION}>
         <Marker coordinate={{ latitude: 34.0522, longitude: -118.2437 }} title="Your Location" />
         <Circle
           center={{ latitude: 34.12, longitude: -118.3 }}
@@ -22,7 +21,7 @@ export function LiveFireMapScreen() {
           fillColor="rgba(255,59,48,0.25)"
           strokeColor="rgba(255,59,48,0.8)"
         />
-      </MapView>
+      </OpenStreetMapView>
       <View style={styles.legend}>
         <Text style={styles.legendText}>Red zones: high wildfire danger</Text>
         <Text style={styles.legendText}>Orange zones: smoke risk</Text>

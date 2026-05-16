@@ -3,7 +3,7 @@
 ## Phase 1 (Weeks 1-2): Foundation
 
 - Set up Expo mobile app, Express backend, FastAPI AI service.
-- Firebase Auth + Firestore integration.
+- PostgreSQL schema + JWT auth integration.
 - Basic user profile and emergency contacts.
 
 ## Phase 2 (Weeks 3-4): Intelligence + Map

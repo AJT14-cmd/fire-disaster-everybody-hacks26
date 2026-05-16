@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { requireAuth } from "../middleware/auth.js";
-import { db } from "../config/firebase.js";
+import { db } from "../config/db.js";
 import { getFireIntelligence } from "../services/fireDataService.js";
 import { getWildfirePrediction } from "../services/predictionService.js";
 
@@ -19,8 +19,25 @@ router.post("/predict", requireAuth, async (req, res) => {
 });
 
 router.get("/shelters", requireAuth, async (req, res) => {
-  const snapshot = await db.collection("shelters").limit(100).get();
-  const shelters = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  const snapshot = await db.query(
+    `
+      SELECT id, name, lat, lng, capacity, current_occupancy, pet_friendly, medical_support, updated_at
+      FROM shelters
+      ORDER BY updated_at DESC
+      LIMIT 100
+    `
+  );
+  const shelters = snapshot.rows.map((row) => ({
+    id: row.id,
+    name: row.name,
+    lat: row.lat,
+    lng: row.lng,
+    capacity: row.capacity,
+    currentOccupancy: row.current_occupancy,
+    petFriendly: row.pet_friendly,
+    medicalSupport: row.medical_support,
+    updatedAt: row.updated_at
+  }));
   return res.json({ shelters });
 });
 

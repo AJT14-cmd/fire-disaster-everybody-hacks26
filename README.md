@@ -21,9 +21,9 @@ fire-disaster-everybody-hacks26/
 ## Tech Stack
 
 - **Frontend:** React Native, Expo, React Navigation
-- **Backend:** Node.js, Express, WebSocket (`ws`), Firebase Admin, Twilio
-- **DB/Auth:** Firebase Firestore, Firebase Auth
-- **Maps:** Google Maps API / Directions
+- **Backend:** Node.js, Express, WebSocket (`ws`), PostgreSQL (`pg`), Twilio
+- **DB/Auth:** Self-hosted PostgreSQL + JWT auth
+- **Maps:** OpenStreetMap tiles + OSRM routing (no API key)
 - **Data Providers:** NASA FIRMS, NOAA, OpenWeather
 - **AI:** FastAPI + scikit-learn
 - **Deploy:** Vercel (mobile web assets/backend), Render/Railway (AI service)
@@ -34,9 +34,10 @@ fire-disaster-everybody-hacks26/
 
 - Node.js 20+
 - Python 3.11+
-- Firebase project + service account JSON
+- Self-hosted PostgreSQL instance
 - Twilio account and phone number
-- Google Maps key, OpenWeather key, NOAA token (optional depending on region)
+- OpenWeather key, NOAA User-Agent string (see backend `.env.example`)
+- Optional: self-hosted OSRM URL (`OSRM_BASE_URL`) for production routing
 
 ### 2) Install Dependencies
 
@@ -97,9 +98,9 @@ Detailed docs: `docs/API.md`.
 
 ## Security Notes
 
-- Location payloads encrypted at rest before Firestore write.
+- Location payloads encrypted at rest before PostgreSQL write.
 - Rate limiting on API routes.
-- Firebase token validation middleware.
+- JWT authentication middleware.
 - All secrets are environment variables.
 
 ## Deployment
@@ -107,6 +108,7 @@ Detailed docs: `docs/API.md`.
 See:
 
 - `docs/DEPLOYMENT.md`
+- `docs/MAPS.md`
 - `docs/SCALABILITY.md`
 
 ## Disclaimer

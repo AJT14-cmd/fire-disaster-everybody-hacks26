@@ -1,3 +1,5 @@
+import { fetchOsrmRoute } from "./osrmService.js";
+
 const EARTH_RADIUS_KM = 6371;
 
 function toRad(deg) {
@@ -25,7 +27,7 @@ function riskPenaltyForDestination(destination, riskZones = []) {
   }, 0);
 }
 
-export function computeBestEvacuationRoute({ origin, destinations, riskZones = [] }) {
+export async function computeBestEvacuationRoute({ origin, destinations, riskZones = [] }) {
   // Score is hybrid: travel time + wildfire exposure penalty.
   const scored = destinations.map((destination) => {
     const distanceKm = haversineKm(origin, destination);
@@ -43,9 +45,23 @@ export function computeBestEvacuationRoute({ origin, destinations, riskZones = [
   });
 
   scored.sort((a, b) => a.score - b.score);
+  const best = scored[0] ?? null;
+
+  let osrmRoute = null;
+  if (best?.destination) {
+    osrmRoute = await fetchOsrmRoute(origin, best.destination);
+    if (osrmRoute) {
+      best.distanceKm = osrmRoute.distanceKm;
+      best.etaMinutes = osrmRoute.etaMinutes;
+      best.geometry = osrmRoute.geometry;
+      best.routingProvider = osrmRoute.provider;
+    }
+  }
+
   return {
-    best: scored[0] ?? null,
+    best,
     alternatives: scored.slice(1, 3),
+    routingProvider: osrmRoute?.provider ?? "heuristic",
     generatedAt: new Date().toISOString()
   };
 }

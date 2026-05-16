@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { db } from "../config/firebase.js";
+import { db } from "../config/db.js";
 import { requireAuth } from "../middleware/auth.js";
 import {
   broadcastImSafe,
@@ -13,17 +13,26 @@ const router = Router();
 
 router.post("/send", requireAuth, async (req, res) => {
   const { userId, severity, message, sendSms: smsEnabled, sendPush } = req.body;
-  const targetUserId = userId ?? req.user.uid;
-  const userDoc = await db.collection("users").doc(targetUserId).get();
-  const user = userDoc.exists ? userDoc.data() : {};
+  if (userId && userId !== req.user.id && !req.user.roles?.includes("admin")) {
+    return res.status(403).json({ error: "Cannot send alerts for another user." });
+  }
+  const targetUserId = userId ?? req.user.id;
+  const userResult = await db.query(
+    "SELECT emergency_contacts FROM users WHERE id = $1 LIMIT 1",
+    [targetUserId]
+  );
+  if (userResult.rowCount === 0) {
+    return res.status(404).json({ error: "Target user not found." });
+  }
+  const user = userResult.rowCount > 0 ? userResult.rows[0] : { emergency_contacts: [] };
 
   const channels = [];
   const outputs = {};
 
-  if (smsEnabled && user?.emergencyContacts?.length) {
+  if (smsEnabled && user?.emergency_contacts?.length) {
     channels.push("sms");
     outputs.sms = await Promise.all(
-      user.emergencyContacts.map((contact) => sendSms(contact.phone, message))
+      user.emergency_contacts.map((contact) => sendSms(contact.phone, message))
     );
   }
   if (sendPush) {
@@ -38,7 +47,7 @@ router.post("/send", requireAuth, async (req, res) => {
 });
 
 router.post("/im-safe", requireAuth, async (req, res) => {
-  const results = await broadcastImSafe(req.user.uid, req.body.note);
+  const results = await broadcastImSafe(req.user.id, req.body.note);
   return res.json({ ok: true, notifications: results });
 });
 

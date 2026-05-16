@@ -13,12 +13,15 @@ function getEnv(name, fallback = undefined) {
 export const env = {
   nodeEnv: process.env.NODE_ENV ?? "development",
   port: Number(process.env.PORT ?? 4000),
-  firebaseProjectId: getEnv("FIREBASE_PROJECT_ID", "demo-project"),
-  firebaseClientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-  firebasePrivateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
-  googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY ?? "",
+  databaseUrl: getEnv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/firepath"),
+  jwtSecret: getEnv("JWT_SECRET", "replace-with-long-random-secret"),
+  jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? "12h",
+  osrmBaseUrl: process.env.OSRM_BASE_URL ?? "https://router.project-osrm.org",
   openWeatherApiKey: process.env.OPENWEATHER_API_KEY ?? "",
-  noaaToken: process.env.NOAA_TOKEN ?? "",
+  // NWS api.weather.gov requires User-Agent with app name + contact (no API key).
+  noaaUserAgent:
+    process.env.NOAA_USER_AGENT ??
+    "FirePathAI/1.0 (set NOAA_USER_AGENT in .env with your email)",
   nasaFirmsApiKey: process.env.NASA_FIRMS_API_KEY ?? "",
   twilioSid: process.env.TWILIO_ACCOUNT_SID ?? "",
   twilioAuthToken: process.env.TWILIO_AUTH_TOKEN ?? "",

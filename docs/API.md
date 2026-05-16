@@ -10,8 +10,16 @@ Base URL: `/api`
 ## Auth
 
 - `GET /auth/me`
-  - Header: `Authorization: Bearer <firebase_id_token>`
+  - Header: `Authorization: Bearer <jwt>`
   - Returns authenticated user profile.
+
+- `POST /auth/register`
+  - Body: `{ email, password, displayName? }`
+  - Returns `{ token, user }`.
+
+- `POST /auth/login`
+  - Body: `{ email, password }`
+  - Returns `{ token, user }`.
 
 ## Users
 
@@ -49,7 +57,8 @@ Base URL: `/api`
 
 - `POST /routes/evacuation`
   - Body: `{ origin, destinations, riskZones, roadClosures }`
-  - Returns safest + fastest route, ETA, shelter candidates.
+  - Returns safest shelter choice, ETA, distance, and OSRM `geometry` polyline when available.
+  - Routing provider: OpenStreetMap data via OSRM (`OSRM_BASE_URL`).
 
 ## Alerts
 
@@ -70,7 +79,7 @@ Base URL: `/api`
 ## Admin
 
 - `GET /admin/dashboard`
-  - Requires admin role claim on Firebase token.
+  - Requires `admin` role in authenticated user record.
   - Returns platform metrics and incident stats.
 
 ## Integrations (Readiness)

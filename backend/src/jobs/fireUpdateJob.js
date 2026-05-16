@@ -1,5 +1,5 @@
 import cron from "node-cron";
-import { db } from "../config/firebase.js";
+import { db } from "../config/db.js";
 import { getFireIntelligence } from "../services/fireDataService.js";
 import { emitEvent } from "../services/websocketService.js";
 import { logger } from "../utils/logger.js";
@@ -14,7 +14,15 @@ export function startFireUpdateJob() {
     try {
       for (const location of WATCH_LOCATIONS) {
         const snapshot = await getFireIntelligence(location.lat, location.lng);
-        await db.collection("fireSnapshots").doc(location.key).set(snapshot, { merge: true });
+        await db.query(
+          `
+            INSERT INTO fire_snapshots (region_key, snapshot, updated_at)
+            VALUES ($1, $2::jsonb, NOW())
+            ON CONFLICT (region_key)
+            DO UPDATE SET snapshot = EXCLUDED.snapshot, updated_at = NOW()
+          `,
+          [location.key, JSON.stringify(snapshot)]
+        );
         emitEvent("fire.update", snapshot);
       }
     } catch (error) {

@@ -4,7 +4,8 @@
 
 1. Set project root to `backend`.
 2. Add all variables from `backend/.env.example`.
-3. Ensure Firebase service account JSON is provided via secure secret.
+3. Ensure `DATABASE_URL` points to your self-hosted PostgreSQL instance.
+4. Ensure PostgreSQL allows inbound connections from your host.
 4. Run start command: `npm run start`.
 
 ## Mobile (Expo)
@@ -12,7 +13,7 @@
 1. Build with EAS:
    - `npx eas build -p ios`
    - `npx eas build -p android`
-2. Inject `EXPO_PUBLIC_API_BASE_URL` and Firebase web config.
+2. Inject `EXPO_PUBLIC_API_BASE_URL` and map API keys.
 
 ## AI Service (Railway/Render)
 

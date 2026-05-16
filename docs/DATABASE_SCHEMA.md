@@ -1,6 +1,6 @@
-# Firestore Schema (Proposed)
+# PostgreSQL Schema (Proposed)
 
-## `users/{userId}`
+## `users`
 
 ```json
 {
@@ -20,11 +20,11 @@
 }
 ```
 
-## `alerts/{alertId}`
+## `alerts`
 
 ```json
 {
-  "userId": "uid123",
+  "userId": "uuid",
   "severity": "critical",
   "message": "Evacuate now. Fire front shifted east.",
   "channels": ["sms", "push"],
@@ -34,7 +34,7 @@
 }
 ```
 
-## `fireSnapshots/{snapshotId}`
+## `fire_snapshots`
 
 ```json
 {
@@ -47,11 +47,11 @@
 }
 ```
 
-## `communityReports/{reportId}`
+## `community_reports`
 
 ```json
 {
-  "userId": "uid123",
+  "userId": "uuid",
   "lat": 34.12,
   "lng": -118.3,
   "type": "smoke",
@@ -62,7 +62,7 @@
 }
 ```
 
-## `shelters/{shelterId}`
+## `shelters`
 
 ```json
 {
@@ -77,11 +77,11 @@
 }
 ```
 
-## `routeHistory/{routeId}`
+## `route_history` (optional future table)
 
 ```json
 {
-  "userId": "uid123",
+  "userId": "uuid",
   "origin": { "lat": 34.1, "lng": -118.2 },
   "destination": { "lat": 34.0, "lng": -118.0 },
   "etaMinutes": 27,

@@ -6,8 +6,8 @@ import { emitEvent } from "../services/websocketService.js";
 const router = Router();
 
 router.post("/evacuation", requireAuth, async (req, res) => {
-  const result = computeBestEvacuationRoute(req.body);
-  emitEvent("route.recommendation", { userId: req.user.uid, route: result });
+  const result = await computeBestEvacuationRoute(req.body);
+  emitEvent("route.recommendation", { userId: req.user.id, route: result });
   return res.json(result);
 });
 

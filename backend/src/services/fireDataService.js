@@ -32,7 +32,7 @@ async function fetchNoaaAlerts(lat, lng) {
   try {
     const { data } = await axios.get("https://api.weather.gov/alerts/active", {
       params: { point: `${lat},${lng}` },
-      headers: env.noaaToken ? { token: env.noaaToken } : {},
+      headers: { "User-Agent": env.noaaUserAgent, Accept: "application/geo+json" },
       timeout: 10000
     });
     return data?.features ?? [];

@@ -1,6 +1,6 @@
 # FirePath AI
 
-Mobile-first wildfire safety and evacuation platform with:
+Web-first wildfire safety and evacuation platform with:
 
 - wildfire risk prediction (AI microservice),
 - live map intelligence (fire, wind, smoke, shelters),
@@ -11,40 +11,38 @@ Mobile-first wildfire safety and evacuation platform with:
 
 ```txt
 fire-disaster-everybody-hacks26/
-  mobile/                # React Native + Expo app
+  web/                   # React + Vite web app (primary UI)
   backend/               # Node.js + Express API + WebSocket + jobs
   ai-service/            # FastAPI wildfire prediction microservice
+  mobile/                # Legacy Expo app (optional)
   docs/                  # API docs, schema docs, roadmap, scalability
   data/                  # mock and sample datasets
 ```
 
 ## Tech Stack
 
-- **Frontend:** React Native, Expo, React Navigation
+- **Frontend:** React, Vite, React Router, Leaflet (OpenStreetMap)
 - **Backend:** Node.js, Express, WebSocket (`ws`), PostgreSQL (`pg`), Twilio
 - **DB/Auth:** Self-hosted PostgreSQL + JWT auth
 - **Maps:** OpenStreetMap tiles + OSRM routing (no API key)
 - **Data Providers:** NASA FIRMS, NOAA, OpenWeather
 - **AI:** FastAPI + scikit-learn
-- **Deploy:** Vercel (mobile web assets/backend), Render/Railway (AI service)
+- **Deploy:** Vercel/static host (web), Render/Railway (backend + AI)
 
 ## Quick Start
 
 ### 1) Prerequisites
 
 - Node.js 20+
-- Python 3.11+
+- Python 3.11 or 3.12 (not 3.14 for scikit-learn wheels)
 - Self-hosted PostgreSQL instance
-- Twilio account and phone number
-- OpenWeather key, NOAA User-Agent string (see backend `.env.example`)
-- Optional: self-hosted OSRM URL (`OSRM_BASE_URL`) for production routing
+- OpenWeather key, NOAA User-Agent string (see `backend/.env.example`)
+- Optional: Twilio for SMS alerts
 
 ### 2) Install Dependencies
 
 ```bash
 npm install
-npm --workspace backend install
-npm --workspace mobile install
 ```
 
 ```bash
@@ -58,30 +56,32 @@ pip install -r ai-service/requirements.txt
 Copy and fill:
 
 - `backend/.env.example` -> `backend/.env`
-- `mobile/.env.example` -> `mobile/.env`
+- `web/.env.example` -> `web/.env`
 - `ai-service/.env.example` -> `ai-service/.env`
 
 ### 4) Run Services
 
 ```bash
-# backend
+# terminal 1 — backend
 npm run dev:backend
 ```
 
 ```bash
-# mobile
-npm run dev:mobile
+# terminal 2 — AI service
+npm run dev:ai
 ```
 
 ```bash
-# ai service
-npm run dev:ai
+# terminal 3 — web app (http://localhost:5173)
+npm run dev:web
 ```
+
+The Vite dev server proxies `/api` to `http://localhost:4000` when using default config.
 
 ## Key Endpoints
 
 - Health: `GET /api/health`
-- Auth profile: `GET /api/auth/me`
+- Auth: `POST /api/auth/register`, `POST /api/auth/login`
 - Fire intelligence: `GET /api/fire/intelligence`
 - Predict risk: `POST /api/fire/predict`
 - Safe route: `POST /api/routes/evacuation`
@@ -89,11 +89,15 @@ npm run dev:ai
 
 Detailed docs: `docs/API.md`.
 
+## Web App Pages
+
+- Landing, Login/Register
+- Dashboard, Live Fire Map, Evacuation Routes
+- Emergency Alerts, AI Assistant, Contacts, Settings
+
 ## AI Training Pipeline
 
 - Training script: `ai-service/train.py`
-- Feature engineering: `ai-service/app/preprocessing.py`
-- Model inference: `ai-service/app/model.py`
 - Sample data: `ai-service/data/sample_training_data.csv`
 
 ## Security Notes
@@ -101,15 +105,10 @@ Detailed docs: `docs/API.md`.
 - Location payloads encrypted at rest before PostgreSQL write.
 - Rate limiting on API routes.
 - JWT authentication middleware.
-- All secrets are environment variables.
 
 ## Deployment
 
-See:
-
-- `docs/DEPLOYMENT.md`
-- `docs/MAPS.md`
-- `docs/SCALABILITY.md`
+See `docs/DEPLOYMENT.md`, `docs/MAPS.md`, `docs/SCALABILITY.md`.
 
 ## Disclaimer
 

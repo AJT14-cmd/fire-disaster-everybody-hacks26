@@ -4,6 +4,10 @@
     "jsx": "react",
     "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
-    "types": ["react", "react-native"]
-  }
+    "types": [
+      "react",
+      "react-native"
+    ]
+  },
+  "extends": "expo/tsconfig.base"
 }

@@ -12,6 +12,15 @@ fire-disaster-everybody-hacks26/
       sample_training_data.csv
     requirements.txt
     train.py
+  web/
+    src/
+      api/
+      components/
+      context/
+      pages/
+    index.html
+    vite.config.ts
+    package.json
   backend/
     src/
       app.js

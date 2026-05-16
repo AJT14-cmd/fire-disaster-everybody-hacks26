@@ -58,13 +58,9 @@ export function Dashboard() {
       <Link to="/app/routes" className="emergency-btn accent" style={{ textAlign: "center" }}>
         Find Safe Route
       </Link>
-      <button
-        type="button"
-        className="emergency-btn safe"
-        onClick={() => api.post("/alerts/im-safe", { note: "I am safe and evacuating." })}
-      >
-        I&apos;M SAFE — Notify Contacts
-      </button>
+      <Link to="/app/assistant" className="emergency-btn safe" style={{ textAlign: "center" }}>
+        AI Safety Assistant
+      </Link>
     </div>
   );
 }

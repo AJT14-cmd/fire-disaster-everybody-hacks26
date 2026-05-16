@@ -23,18 +23,22 @@ Base URL: `/api`
 
 ## Users
 
-- `PUT /users/profile`
-  - Body: `{ displayName, evacuationPreferences, emergencyContacts }`
-  - Updates user profile and safety preferences.
+- `GET /users/profile`
+  - Returns `{ displayName, evacuationPreferences, alertPhone }`.
 
-- `GET /users/alerts/history`
-  - Returns historical alerts sent to the user.
+- `PUT /users/profile`
+  - Body: `{ displayName?, evacuationPreferences?, homeLocation?, alertPhone? }`
+  - Updates user profile. `alertPhone` is stored for future SMS alerts (not sent yet).
 
 ## Fire Intelligence
 
 - `GET /fire/intelligence?lat=34.1&lng=-118.2`
-  - Aggregates NASA FIRMS + NOAA + OpenWeather.
-  - Returns active fires, wind data, smoke proxy, and risk overlay.
+  - Aggregates NIFC WFIGS + NASA FIRMS + NOAA + OpenWeather.
+  - Returns `confirmedIncidents` (NIFC WFIGS), `activeFires` (FIRMS heat anomalies), `firePerimeters`, weather, smoke proxy.
+
+- `POST /assistant/chat`
+  - Body: `{ "question": "...", "lat": 47.6, "lng": -122.3 }`
+  - Returns contextual emergency guidance using live fire intel, shelters, and risk model.
 
 - `POST /fire/predict`
   - Body:
@@ -50,25 +54,16 @@ Base URL: `/api`
     ```
   - Calls AI microservice and returns risk score, spread direction, ETA.
 
-- `GET /fire/shelters`
-  - Returns tracked shelters and occupancy metadata.
+- `GET /fire/shelters?lat=&lng=&limit=25`
+  - Returns nearest evacuation sites: DB shelters, OpenStreetMap police/fire stations/schools, and defaults.
+  - Each item includes `category`: `shelter`, `police`, `fire_department`, or `school`.
 
 ## Routes
 
 - `POST /routes/evacuation`
-  - Body: `{ origin, destinations, riskZones, roadClosures }`
-  - Returns safest shelter choice, ETA, distance, and OSRM `geometry` polyline when available.
+  - Body: `{ origin, destinations, riskZones?, travelMode?: "driving" | "walking" }`
+  - Returns safest shelter choice, ETA, distance, `travelMode`, and OSRM `geometry` polyline when available.
   - Routing provider: OpenStreetMap data via OSRM (`OSRM_BASE_URL`).
-
-## Alerts
-
-- `POST /alerts/send`
-  - Body: `{ userId, severity, message, sendSms, sendPush }`
-  - Sends Twilio SMS and/or push notification.
-
-- `POST /alerts/im-safe`
-  - Body: `{ userId, note }`
-  - Broadcasts "I'm safe" to emergency contacts.
 
 ## Community
 
@@ -98,9 +93,7 @@ Server emits:
 
 - `fire.update`: latest fire overlays/intelligence
 - `route.recommendation`: newly computed safer route
-- `alert.urgent`: high-severity emergency warning
 
 Client emits:
 
 - `subscribe.region`: `{ lat, lng, radiusKm }`
-- `ack.alert`: `{ alertId }`

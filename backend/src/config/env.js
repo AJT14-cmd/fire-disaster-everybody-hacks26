@@ -23,9 +23,6 @@ export const env = {
     process.env.NOAA_USER_AGENT ??
     "FirePathAI/1.0 (set NOAA_USER_AGENT in .env with your email)",
   nasaFirmsApiKey: process.env.NASA_FIRMS_API_KEY ?? "",
-  twilioSid: process.env.TWILIO_ACCOUNT_SID ?? "",
-  twilioAuthToken: process.env.TWILIO_AUTH_TOKEN ?? "",
-  twilioFrom: process.env.TWILIO_FROM_NUMBER ?? "",
   aiServiceBaseUrl: process.env.AI_SERVICE_BASE_URL ?? "http://localhost:8000",
   locationEncryptionKey: getEnv(
     "LOCATION_ENCRYPTION_KEY",

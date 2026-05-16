@@ -9,7 +9,7 @@ fire-disaster-everybody-hacks26/
       preprocessing.py
       schemas.py
     data/
-      sample_training_data.csv
+      Washington_Large_Fires_1973-2022.csv
     requirements.txt
     train.py
   web/

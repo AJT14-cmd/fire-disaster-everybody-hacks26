@@ -13,9 +13,7 @@ export function Layout() {
         </NavLink>
         <NavLink to="/app/map">Map</NavLink>
         <NavLink to="/app/routes">Routes</NavLink>
-        <NavLink to="/app/alerts">Alerts</NavLink>
         <NavLink to="/app/assistant">Assistant</NavLink>
-        <NavLink to="/app/contacts">Contacts</NavLink>
         <NavLink to="/app/settings">Settings</NavLink>
         <span className="spacer" />
         <span className="muted" style={{ alignSelf: "center", fontSize: "0.85rem" }}>

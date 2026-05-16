@@ -39,11 +39,7 @@ export function HomeDashboardScreen({ navigation }: any) {
       <View style={styles.gap} />
       <EmergencyButton label="Live Fire Map" kind="warning" onPress={() => navigation.navigate("Map")} />
       <EmergencyButton label="Find Safe Route" kind="accent" onPress={() => navigation.navigate("Routes")} />
-      <EmergencyButton
-        label="I'M SAFE - Notify Contacts"
-        kind="safe"
-        onPress={() => api.post("/alerts/im-safe", { note: "I am safe and evacuating." })}
-      />
+      <EmergencyButton label="AI Safety Assistant" kind="safe" onPress={() => navigation.navigate("Assistant")} />
     </ScrollView>
   );
 }

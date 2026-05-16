@@ -34,6 +34,59 @@ input {
   background: #161b22;
 }
 
+/* DivIcon markers (no Leaflet PNG assets required) */
+.map-marker {
+  background: transparent;
+  border: none;
+}
+
+.map-marker span {
+  display: block;
+  box-sizing: border-box;
+}
+
+.map-marker-user span {
+  width: 16px;
+  height: 16px;
+  margin: 2px;
+  border-radius: 50%;
+  background: #0a84ff;
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 2px rgba(10, 132, 255, 0.45), 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+
+.map-marker-fire span {
+  width: 14px;
+  height: 14px;
+  margin: 5px 5px 13px;
+  background: #ff9500;
+  border: 2px solid #fff;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  box-shadow: 0 0 0 2px rgba(255, 149, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+.map-marker-confirmed span {
+  width: 16px;
+  height: 16px;
+  margin: 4px 5px 14px;
+  background: #ff3b30;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px rgba(255, 59, 48, 0.55), 0 2px 8px rgba(0, 0, 0, 0.45);
+}
+
+.map-marker-shelter span {
+  width: 14px;
+  height: 14px;
+  margin: 5px 5px 13px;
+  background: #30d158;
+  border: 2px solid #fff;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
 .page {
   padding: 1.25rem;
   max-width: 960px;
@@ -58,10 +111,123 @@ input {
 }
 
 .map-panel {
+  position: relative;
   height: 420px;
   border-radius: 12px;
   overflow: hidden;
   margin: 1rem 0;
+}
+
+.map-layer-select-wrap {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  max-width: calc(100% - 20px);
+}
+
+.map-layer-select-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #9aa4b2;
+  margin: 0;
+}
+
+.travel-mode-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.travel-mode-option {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #e6edf3;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.travel-mode-option input {
+  accent-color: #0a84ff;
+}
+
+.sites-panel {
+  margin-top: 0.75rem;
+}
+
+.sites-list {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+}
+
+.sites-list li {
+  margin: 0;
+  padding: 0;
+}
+
+.site-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.45rem 0.5rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  text-align: left;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.sites-list li:nth-child(odd) .site-row {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.site-row:hover:not(:disabled) {
+  background: rgba(10, 132, 255, 0.15);
+}
+
+.site-row:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.site-name {
+  flex: 1;
+  min-width: 0;
+}
+
+.site-distance {
+  flex-shrink: 0;
+  color: #9aa4b2;
+  font-size: 0.85rem;
+}
+
+.site-selected {
+  outline: 1px solid #0a84ff;
+  background: rgba(10, 132, 255, 0.2) !important;
+}
+
+.map-layer-select {
+  background: #161b22;
+  color: #f0f3f7;
+  border: 1px solid #3d4f63;
+  border-radius: 8px;
+  padding: 0.4rem 0.55rem;
+  font-size: 0.85rem;
+  max-width: 100%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
 }
 
 .map-attribution {
@@ -123,6 +289,27 @@ input {
 .emergency-btn.safe {
   background: #34c759;
 }
+.emergency-btn.secondary {
+  background: #5e5ce6;
+}
+
+.quick-prompt-btn {
+  background: #2a3140;
+  color: #f0f3f7;
+  border: 1px solid #3d4f63;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.quick-prompt-btn:hover:not(:disabled) {
+  background: #354053;
+  border-color: #4a5f78;
+}
+
+.quick-prompt-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
 
 .risk-card {
   border: 2px solid #ff9500;
@@ -142,6 +329,35 @@ input {
   font-size: 1.75rem;
   font-weight: 900;
   margin: 0.5rem 0;
+}
+
+.alert-section-title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0 0 0.5rem;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.alert-section-intro {
+  margin: 0 0 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid #2a3140;
+}
+
+.placeholder-badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: #3d3520;
+  color: #ffcc00;
+  border: 1px solid #665c33;
 }
 
 .field {

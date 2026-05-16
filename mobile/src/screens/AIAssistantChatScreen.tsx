@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Alert, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import * as Location from "expo-location";
 import { EmergencyButton } from "../components/EmergencyButton";
 import { api } from "../services/api";
 import { colors } from "../theme/colors";
@@ -12,26 +13,34 @@ const QUICK_PROMPTS = [
 ];
 
 export function AIAssistantChatScreen() {
-  const [prompt, setPrompt] = useState(QUICK_PROMPTS[0]);
+  const [prompt, setPrompt] = useState("");
   const [answer, setAnswer] = useState("Ask FirePath AI for emergency guidance.");
+  const [loading, setLoading] = useState(false);
 
-  async function ask() {
+  async function getCoords() {
+    const { status } = await Location.requestForegroundPermissionsAsync();
+    if (status !== "granted") {
+      return { lat: 47.656, lng: -122.317 };
+    }
+    const pos = await Location.getCurrentPositionAsync({});
+    return { lat: pos.coords.latitude, lng: pos.coords.longitude };
+  }
+
+  async function ask(question: string) {
+    const text = question.trim();
+    if (!text) return;
+
+    setLoading(true);
+    setPrompt(text);
+
     try {
-      const { data } = await api.post("/fire/predict", {
-        latitude: 34.05,
-        longitude: -118.24,
-        temperature_c: 34,
-        humidity_pct: 20,
-        wind_speed_kph: 30,
-        vegetation_dryness_index: 0.83
-      });
-      setAnswer(
-        `Risk ${(data.risk_score * 100).toFixed(1)}% (confidence ${(data.confidence * 100).toFixed(
-          0
-        )}%). Spread ${data.spread_direction}, ETA ${data.estimated_arrival_minutes} min.`
-      );
+      const { lat, lng } = await getCoords();
+      const { data } = await api.post("/assistant/chat", { question: text, lat, lng });
+      setAnswer(data.answer);
     } catch {
       Alert.alert("Assistant unavailable", "Could not retrieve guidance.");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -45,13 +54,13 @@ export function AIAssistantChatScreen() {
         placeholder="Ask an emergency question..."
         placeholderTextColor={colors.muted}
       />
-      <EmergencyButton label="Ask Assistant" kind="accent" onPress={ask} />
+      <EmergencyButton label={loading ? "Thinking…" : "Ask Assistant"} kind="accent" onPress={() => ask(prompt)} />
       <View style={styles.answerCard}>
         <Text style={styles.answer}>{answer}</Text>
       </View>
       <Text style={styles.quickTitle}>Quick prompts</Text>
       {QUICK_PROMPTS.map((item) => (
-        <Text key={item} style={styles.quickItem}>
+        <Text key={item} style={styles.quickItem} onPress={() => ask(item)}>
           - {item}
         </Text>
       ))}

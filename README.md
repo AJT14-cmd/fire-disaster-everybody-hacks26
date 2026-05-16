@@ -5,7 +5,7 @@ Web-first wildfire safety and evacuation platform with:
 - wildfire risk prediction (AI microservice),
 - live map intelligence (fire, wind, smoke, shelters),
 - safe evacuation route optimization,
-- real-time push/SMS emergency alerts.
+- AI safety assistant for contextual evacuation guidance.
 
 ## Monorepo Structure
 
@@ -22,10 +22,10 @@ fire-disaster-everybody-hacks26/
 ## Tech Stack
 
 - **Frontend:** React, Vite, React Router, Leaflet (OpenStreetMap)
-- **Backend:** Node.js, Express, WebSocket (`ws`), PostgreSQL (`pg`), Twilio
+- **Backend:** Node.js, Express, WebSocket (`ws`), PostgreSQL (`pg`)
 - **DB/Auth:** Self-hosted PostgreSQL + JWT auth
 - **Maps:** OpenStreetMap tiles + OSRM routing (no API key)
-- **Data Providers:** NASA FIRMS, NOAA, OpenWeather
+- **Data Providers:** NIFC WFIGS (confirmed fires), NASA FIRMS (heat anomalies), NOAA, OpenWeather
 - **AI:** FastAPI + scikit-learn
 - **Deploy:** Vercel/static host (web), Render/Railway (backend + AI)
 
@@ -37,8 +37,6 @@ fire-disaster-everybody-hacks26/
 - Python 3.11 or 3.12 (not 3.14 for scikit-learn wheels)
 - Self-hosted PostgreSQL instance
 - OpenWeather key, NOAA User-Agent string (see `backend/.env.example`)
-- Optional: Twilio for SMS alerts
-
 ### 2) Install Dependencies
 
 ```bash
@@ -85,7 +83,7 @@ The Vite dev server proxies `/api` to `http://localhost:4000` when using default
 - Fire intelligence: `GET /api/fire/intelligence`
 - Predict risk: `POST /api/fire/predict`
 - Safe route: `POST /api/routes/evacuation`
-- Alerts: `POST /api/alerts/send`, `POST /api/alerts/im-safe`
+- Assistant: `POST /api/assistant/chat`
 
 Detailed docs: `docs/API.md`.
 
@@ -93,12 +91,12 @@ Detailed docs: `docs/API.md`.
 
 - Landing, Login/Register
 - Dashboard, Live Fire Map, Evacuation Routes
-- Emergency Alerts, AI Assistant, Contacts, Settings
+- AI Assistant, Settings
 
 ## AI Training Pipeline
 
 - Training script: `ai-service/train.py`
-- Sample data: `ai-service/data/sample_training_data.csv`
+- Training data: `ai-service/data/Washington_Large_Fires_1973-2022.csv`
 
 ## Security Notes
 

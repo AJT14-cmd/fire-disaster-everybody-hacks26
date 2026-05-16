@@ -7,7 +7,7 @@ export function LandingScreen({ navigation }: any) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>FirePath AI</Text>
-      <Text style={styles.subtitle}>Predict danger. Route safely. Alert instantly.</Text>
+      <Text style={styles.subtitle}>Predict danger. Route safely. Stay informed.</Text>
       <EmergencyButton label="Get Started" kind="accent" onPress={() => navigation.navigate("Login")} />
     </View>
   );

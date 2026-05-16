@@ -5,51 +5,68 @@ import { encryptJson } from "../services/encryptionService.js";
 
 const router = Router();
 
+router.get("/profile", requireAuth, async (req, res) => {
+  const result = await db.query(
+    `
+      SELECT display_name, evacuation_preferences
+      FROM users
+      WHERE id = $1
+      LIMIT 1
+    `,
+    [req.user.id]
+  );
+  if (result.rowCount === 0) {
+    return res.status(404).json({ error: "User not found." });
+  }
+  const row = result.rows[0];
+  const prefs = row.evacuation_preferences ?? {};
+  return res.json({
+    displayName: row.display_name,
+    evacuationPreferences: prefs,
+    alertPhone: prefs.alertPhone ?? null
+  });
+});
+
 router.put("/profile", requireAuth, async (req, res) => {
-  const { displayName, emergencyContacts = [], evacuationPreferences = {}, homeLocation } = req.body;
+  const { displayName, evacuationPreferences, homeLocation, alertPhone } = req.body;
+
+  let mergedPreferences = evacuationPreferences;
+  if (alertPhone !== undefined || evacuationPreferences) {
+    const current = await db.query(
+      "SELECT evacuation_preferences FROM users WHERE id = $1 LIMIT 1",
+      [req.user.id]
+    );
+    const existing = current.rows[0]?.evacuation_preferences ?? {};
+    mergedPreferences = {
+      ...existing,
+      ...(evacuationPreferences ?? {}),
+      ...(alertPhone !== undefined
+        ? { alertPhone: String(alertPhone).trim() || null, alertSmsEnabled: false }
+        : {})
+    };
+  }
+
   await db.query(
     `
       UPDATE users
       SET
         display_name = COALESCE($2, display_name),
-        emergency_contacts = $3::jsonb,
-        evacuation_preferences = $4::jsonb,
-        home_location_encrypted = COALESCE($5, home_location_encrypted),
+        evacuation_preferences = COALESCE($3::jsonb, evacuation_preferences),
+        home_location_encrypted = COALESCE($4, home_location_encrypted),
         updated_at = NOW()
       WHERE id = $1
     `,
     [
       req.user.id,
       displayName ?? null,
-      JSON.stringify(emergencyContacts),
-      JSON.stringify(evacuationPreferences),
+      mergedPreferences ? JSON.stringify(mergedPreferences) : null,
       homeLocation ? encryptJson(homeLocation) : null
     ]
   );
-  return res.json({ ok: true });
-});
-
-router.get("/alerts/history", requireAuth, async (req, res) => {
-  const alerts = await db.query(
-    `
-      SELECT id, severity, message, channels, status, metadata, created_at
-      FROM alerts
-      WHERE user_id = $1
-      ORDER BY created_at DESC
-      LIMIT 50
-    `,
-    [req.user.id]
-  );
   return res.json({
-    alerts: alerts.rows.map((row) => ({
-      id: row.id,
-      severity: row.severity,
-      message: row.message,
-      channels: row.channels,
-      status: row.status,
-      metadata: row.metadata,
-      createdAt: row.created_at
-    }))
+    ok: true,
+    alertPhone: mergedPreferences?.alertPhone ?? null,
+    message: "Profile saved. Mobile SMS alerts are not active yet."
   });
 });
 

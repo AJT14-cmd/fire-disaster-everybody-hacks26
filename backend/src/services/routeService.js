@@ -1,4 +1,4 @@
-import { fetchOsrmRoute } from "./osrmService.js";
+import { fetchOsrmRoute, normalizeTravelMode, travelModeSpeedKph } from "./osrmService.js";
 
 const EARTH_RADIUS_KM = 6371;
 
@@ -16,6 +16,29 @@ function haversineKm(a, b) {
   return 2 * EARTH_RADIUS_KM * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
 }
 
+function straightLineGeometry(origin, destination, travelMode = "driving", segments = 24) {
+  const mode = normalizeTravelMode(travelMode);
+  const points = [];
+  for (let i = 0; i <= segments; i += 1) {
+    const t = i / segments;
+    points.push({
+      lat: origin.lat + t * (destination.lat - origin.lat),
+      lng: origin.lng + t * (destination.lng - origin.lng)
+    });
+  }
+  // Walking fallback: slight offset so map line is visibly distinct if OSRM fails.
+  if (mode === "walking" && points.length > 2) {
+    return points.map((p, index) => {
+      if (index === 0 || index === points.length - 1) return p;
+      return {
+        lat: p.lat + 0.00015 * Math.sin(index * 0.9),
+        lng: p.lng + 0.00015 * Math.cos(index * 0.9)
+      };
+    });
+  }
+  return points;
+}
+
 function riskPenaltyForDestination(destination, riskZones = []) {
   // Risk zones contribute penalty based on proximity and severity.
   return riskZones.reduce((penalty, zone) => {
@@ -27,13 +50,21 @@ function riskPenaltyForDestination(destination, riskZones = []) {
   }, 0);
 }
 
-export async function computeBestEvacuationRoute({ origin, destinations, riskZones = [] }) {
+export async function computeBestEvacuationRoute({
+  origin,
+  destinations,
+  riskZones = [],
+  travelMode = "driving"
+}) {
+  const mode = normalizeTravelMode(travelMode);
+  const speedKph = travelModeSpeedKph(mode);
+
   // Score is hybrid: travel time + wildfire exposure penalty.
   const scored = destinations.map((destination) => {
     const distanceKm = haversineKm(origin, destination);
     const riskPenalty = riskPenaltyForDestination(destination, riskZones);
     const trafficFactor = destination.trafficFactor ?? 1.0;
-    const etaMinutes = (distanceKm / 60) * 60 * trafficFactor;
+    const etaMinutes = (distanceKm / speedKph) * 60 * trafficFactor;
     const score = etaMinutes + riskPenalty * 60;
     return {
       destination,
@@ -49,18 +80,28 @@ export async function computeBestEvacuationRoute({ origin, destinations, riskZon
 
   let osrmRoute = null;
   if (best?.destination) {
-    osrmRoute = await fetchOsrmRoute(origin, best.destination);
+    osrmRoute = await fetchOsrmRoute(origin, best.destination, mode);
     if (osrmRoute) {
       best.distanceKm = osrmRoute.distanceKm;
       best.etaMinutes = osrmRoute.etaMinutes;
       best.geometry = osrmRoute.geometry;
       best.routingProvider = osrmRoute.provider;
+      best.travelMode = osrmRoute.travelMode;
+    } else {
+      best.geometry = straightLineGeometry(origin, best.destination, mode);
+      best.routingProvider = "straight-line-fallback";
+      best.travelMode = mode;
+      best.etaMinutes = Math.max(
+        1,
+        Math.round((best.distanceKm / speedKph) * 60 * (best.destination.trafficFactor ?? 1))
+      );
     }
   }
 
   return {
     best,
     alternatives: scored.slice(1, 3),
+    travelMode: mode,
     routingProvider: osrmRoute?.provider ?? "heuristic",
     generatedAt: new Date().toISOString()
   };

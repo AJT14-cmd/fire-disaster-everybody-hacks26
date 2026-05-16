@@ -5,8 +5,7 @@ import { requireAdmin, requireAuth } from "../middleware/auth.js";
 const router = Router();
 
 router.get("/dashboard", requireAuth, requireAdmin, async (req, res) => {
-  const [alertsCount, reportsCount, shelters] = await Promise.all([
-    db.query("SELECT COUNT(*)::int AS count FROM alerts"),
+  const [reportsCount, shelters] = await Promise.all([
     db.query("SELECT COUNT(*)::int AS count FROM community_reports"),
     db.query(
       "SELECT name, capacity, current_occupancy FROM shelters ORDER BY updated_at DESC LIMIT 100"
@@ -20,7 +19,6 @@ router.get("/dashboard", requireAuth, requireAdmin, async (req, res) => {
 
   return res.json({
     metrics: {
-      alertsCount: alertsCount.rows[0].count,
       communityReportsCount: reportsCount.rows[0].count,
       sheltersTracked: shelters.rows.length
     },

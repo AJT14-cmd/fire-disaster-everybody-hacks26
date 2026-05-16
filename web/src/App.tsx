@@ -1,9 +1,7 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import { useAuth } from "./context/AuthContext";
-import { Alerts } from "./pages/Alerts";
 import { Assistant } from "./pages/Assistant";
-import { Contacts } from "./pages/Contacts";
 import { Dashboard } from "./pages/Dashboard";
 import { Landing } from "./pages/Landing";
 import { LiveMap } from "./pages/LiveMap";
@@ -40,9 +38,7 @@ export default function App() {
         <Route index element={<Dashboard />} />
         <Route path="map" element={<LiveMap />} />
         <Route path="routes" element={<RoutesPage />} />
-        <Route path="alerts" element={<Alerts />} />
         <Route path="assistant" element={<Assistant />} />
-        <Route path="contacts" element={<Contacts />} />
         <Route path="settings" element={<Settings />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

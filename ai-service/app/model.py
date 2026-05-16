@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
 
-from app.preprocessing import engineer_features
+from app.preprocessing import engineer_features, features_from_payload
 
 
 MODEL_FILE = Path(__file__).with_name("model.joblib")
@@ -14,8 +14,8 @@ def load_or_create_model():
     if MODEL_FILE.exists():
         return joblib.load(MODEL_FILE)
 
-    # Fallback synthetic bootstrap model for first-run development.
-    # Real deployments should train from verified historical wildfire datasets.
+    # Fallback bootstrap model when model.joblib is missing.
+    # Run `python train.py` to train from Washington_Large_Fires_1973-2022.csv.
     rng = np.random.default_rng(42)
     sample = pd.DataFrame(
         {
@@ -40,15 +40,17 @@ def load_or_create_model():
 
 
 def predict_risk(model, payload: dict) -> dict:
-    frame = pd.DataFrame([payload])
-    engineered = engineer_features(frame)
-    risk = float(np.clip(model.predict(engineered)[0], 0, 1))
+    engineered = features_from_payload(payload)
+    feature_names = getattr(model, "feature_names_in_", engineered.columns)
+    X = engineered[list(feature_names)]
+    risk = float(np.clip(model.predict(X)[0], 0, 1))
 
     feature_importance = getattr(model, "feature_importances_", None)
     explainability = {}
     if feature_importance is not None:
+        importance_names = getattr(model, "feature_names_in_", engineered.columns)
         explainability["top_factors"] = sorted(
-            zip(engineered.columns, feature_importance),
+            zip(importance_names, feature_importance),
             key=lambda x: x[1],
             reverse=True,
         )[:3]
